@@ -13,11 +13,74 @@
  * writing app.js a little simpler to work with.
  */
 
-var Engine = (function(global) {
+
+
+//***************************************************************************
+//************************     CONTROLS    **********************************
+//***************************************************************************
+const BLOCK_HEIGHT = 83;
+const BLOCK_WIDTH = 101;
+const NUMBER_OF_ROWS = 6;
+const NUMBER_OF_COLS = 5;
+const START_POSITION = { col: 2, row: 5 };
+const CORDINATES = { col: NUMBER_OF_COLS, row: NUMBER_OF_ROWS };
+const scoreElement = document.querySelector('.score');
+let score = 0;
+
+
+//***************************************************************************
+//************************     HELPERS     **********************************
+//***************************************************************************
+
+function resetScore() {
+    score = 0;
+    scoreElement.textContent = `score : ${score}`;
+}
+
+function addScore() {
+    score += 1;
+    scoreElement.textContent = `score : ${score}`;
+}
+
+//______________________GENERATE RANDOM COLUMN INDEX __________________________
+function randomCol(height) {
+    return { x: (parseInt(Math.random() * 5) * BLOCK_WIDTH), y: BLOCK_HEIGHT * height - 20 };
+}
+
+
+
+
+//***************************************************************************
+//************************     AGENTS     **********************************
+//***************************************************************************
+const allEnemies = [new Enemy(randomCol(1), CORDINATES), new Enemy(randomCol(2), CORDINATES), new Enemy(randomCol(3), CORDINATES)];
+const player = new Player(START_POSITION, CORDINATES);
+
+
+
+
+// This listens for key presses and sends the keys to your
+// Player.handleInput() method. You don't need to modify this.
+document.addEventListener('keyup', function (e) {
+    var allowedKeys = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+    };
+
+    player.handleInput(allowedKeys[e.keyCode]);
+});
+
+var Engine = (function (global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
      * set the canvas element's height/width and add it to the DOM.
      */
+
+
+
+
     var doc = global.document,
         win = global.window,
         canvas = doc.createElement('canvas'),
@@ -79,7 +142,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        player.checkCrash();
     }
 
     /* This is called by the update function and loops through all of the
@@ -90,7 +153,7 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
+        allEnemies.forEach(function (enemy) {
             enemy.update(dt);
         });
         player.update();
@@ -107,26 +170,25 @@ var Engine = (function(global) {
          * for that particular row of the game level.
          */
         var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
-            ],
-            numRows = 6,
-            numCols = 5,
+            'images/water-block.png',   // Top row is water
+            'images/stone-block.png',   // Row 1 of 3 of stone
+            'images/stone-block.png',   // Row 2 of 3 of stone
+            'images/stone-block.png',   // Row 3 of 3 of stone
+            'images/grass-block.png',   // Row 1 of 2 of grass
+            'images/grass-block.png'    // Row 2 of 2 of grass
+        ],
+
             row, col;
 
         // Before drawing, clear existing canvas
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-        for (row = 0; row < numRows; row++) {
-            for (col = 0; col < numCols; col++) {
+        for (row = 0; row < NUMBER_OF_ROWS; row++) {
+            for (col = 0; col < NUMBER_OF_COLS; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
                  * to start drawing and the y coordinate to start drawing.
@@ -134,7 +196,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                ctx.drawImage(Resources.get(rowImages[row]), col * BLOCK_WIDTH, row * BLOCK_HEIGHT);
             }
         }
 
@@ -149,7 +211,7 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        allEnemies.forEach(function(enemy) {
+        allEnemies.forEach(function (enemy) {
             enemy.render();
         });
 
@@ -173,7 +235,7 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-horn-girl.png'
     ]);
     Resources.onReady(init);
 
