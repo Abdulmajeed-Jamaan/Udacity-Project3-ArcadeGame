@@ -1,4 +1,4 @@
-# UDACITY FE NANODEGREE Project 3  Arcade Game
+# UDACITY Front-End ND Project 3 Arcade Game
 
 
 ## About the Project
